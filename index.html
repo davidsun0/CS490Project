@@ -97,7 +97,7 @@ legend.selectAll("partstext")
     .attr("x", (d, i) => (60 + (i % 3) * 80))
     .attr("y", (d, i) => (30 + (Math.floor(i / 3)) * 20))
 
-d3.json("top100mat2.json", function(error, graph) {
+d3.json("data.json", function(error, graph) {
     if (error) throw error;
 
     function indexToColor(d) {
