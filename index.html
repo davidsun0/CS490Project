@@ -1,4 +1,3 @@
-<!-- Code from d3-graph-gallery.com -->
 <!DOCTYPE html>
 <meta charset="utf-8">
 <html>
@@ -7,17 +6,8 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <style>
-    div.tooltip {
-        position: absolute;
-        width: 100px;
-        height: 100px;
-        background: #FF00FF;
-    }
-    .node {
-        position: relative;
-    }
     body {
-        background: #EEE;
+        background: #F8F8F8;
         font-family: sans-serif;
     }
     #morphemes {
@@ -30,26 +20,20 @@
         left: 20px;
         bottom: 20px;
         z-index: 10;
-        background: #FFF;
         height: 110px;
-        border-radius: 20px;
-        border: 2px solid #000;
     }
     #infobox {
         display: none;
         position: absolute;
         right: 20px;
         top: 20px;
-        background: #FFF;
-        border-radius: 20px;
-        border: 2px solid #000;
         width: 300px;
         padding: 10px;
     }
 </style>
 <body>
 <svg id="morphemes"></svg>
-<svg id="legend">test</svg>
+<svg id="legend"></svg>
 <div id="infobox"></div>
 <script>
 
@@ -66,9 +50,7 @@ var svg = d3.select("#morphemes")
 
 var infobox = d3.select("#infobox")
 
-var linklabs = [10, 50, 500]
-var nodelabs = [100, 500, 1000]
-var partlabs = ["ACP", "ADJ", "ADV", "CFX", "COP", "N", "P", "PFX", "SFX", "VAX", "VB", "XTN"]
+var partlabs = ["P", "N", "VAX", "VB", "ACP", "COP", "ADJ", "XTN", "PFX", "SFX", "ADV", "CFX"]
 var partColor = d3.scaleOrdinal()
     .domain(partlabs)
     .range(d3.schemeSet2)
@@ -80,12 +62,10 @@ var legend = d3.select("#legend")
 legend.selectAll("parts")
     .data(partlabs)
     .enter()
-    .append("rect")
-    .attr("x", (d, i) => (40 + (i % 3) * 80))
-    .attr("y", (d, i) => (20 + (Math.floor(i / 3)) * 20))
-    .attr("width", 10)
-    .attr("height", 10)
-    .attr("stroke", "#000")
+    .append("circle")
+    .attr("cx", (d, i) => (40 + (i % 3) * 80))
+    .attr("cy", (d, i) => (25 + (Math.floor(i / 3)) * 20))
+    .attr("r", 5)
     .attr("fill", d => partColor(d))
 
 // part of speech labels
@@ -95,23 +75,23 @@ legend.selectAll("partstext")
     .append("text")
     .text(d => d)
     .attr("x", (d, i) => (60 + (i % 3) * 80))
-    .attr("y", (d, i) => (30 + (Math.floor(i / 3)) * 20))
+    .attr("y", (d, i) => (31 + (Math.floor(i / 3)) * 20))
 
 d3.json("data.json", function(error, graph) {
     if (error) throw error;
 
     function indexToColor(d) {
-        console.log(d)
         return partColor(graph.nodes[d].pos)
     }
 
     function clicked(event, d) {
         if (event.defaultPrevented) return;
-        content = graph.nodes[d].info + "<hr>" + graph.nodes[d].count + " occurrences"
+        content = graph.nodes[d].info + "<hr><p>" + graph.nodes[d].count + " occurrences</p>"
         infobox.html(content)
             .style("display", "block")
     }
 
+    // calculate chord diagram
     var chord = d3.chord()
         .sortSubgroups(d3.descending)
         .padAngle(0.01)
@@ -126,9 +106,9 @@ d3.json("data.json", function(error, graph) {
         .enter()
         .append("g")
 
+    // ring segment
     ring.append("path")
         .style("fill", d => indexToColor(d.index))
-        .style("stroke", "#444")
         .attr("d", d3.arc()
             .innerRadius(wradius - 90)
             .outerRadius(wradius - 70))
@@ -136,6 +116,7 @@ d3.json("data.json", function(error, graph) {
         .on("click", clicked)
         .on("mouseover", clicked)
 
+    // data label
     ring.append("text")
         .text(function(d) {
             return graph.nodes[d.index].id})
@@ -147,16 +128,11 @@ d3.json("data.json", function(error, graph) {
             if(deg > 90) {
                 deg = deg - 180
                 radius = radius + 35
-                // flip = "scale(-1, 1) "
             }
             var x = radius * Math.cos(angle - Math.PI / 2)
             var y = radius * Math.sin(angle - Math.PI / 2)
             return "translate(" + x + " , " + y + ") rotate(" + deg + ")" + flip })
         .attr("font-size", "0.5em")
-        //.attr("x", d => wradius * Math.cos(d.startAngle - Math.PI / 2))
-        //.attr("y", d => wradius * Math.sin(d.startAngle - Math.PI / 2))
-        //.attr("transform", d => "rotate(" + d.startAngle / Math.PI * 180 + ")")
-        // .text(d => graph.nodes[d.index].name.split("#")[1])
 
     // chords
     svg
@@ -170,6 +146,5 @@ d3.json("data.json", function(error, graph) {
                 .radius(wradius - 95))
             .style("fill", d => indexToColor(d.source.index))
 });
-
 </script>
 </body>
