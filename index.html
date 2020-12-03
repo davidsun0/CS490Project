@@ -84,11 +84,16 @@ d3.json("data.json", function(error, graph) {
         return partColor(graph.nodes[d].pos)
     }
 
-    function clicked(event, d) {
+    function ringOver(event, d) {
         if (event.defaultPrevented) return;
         content = graph.nodes[d].info + "<hr><p>" + graph.nodes[d].count + " occurrences</p>"
         infobox.html(content)
             .style("display", "block")
+        d3.select(this).style("stroke", "#000")
+    }
+
+    function ringOut(event, d) {
+        d3.select(this).style("stroke", "none")
     }
 
     // calculate chord diagram
@@ -110,11 +115,12 @@ d3.json("data.json", function(error, graph) {
     ring.append("path")
         .style("fill", d => indexToColor(d.index))
         .attr("d", d3.arc()
-            .innerRadius(wradius - 90)
+            .innerRadius(wradius - 110)
             .outerRadius(wradius - 70))
         .style("cursor", "pointer")
-        .on("click", clicked)
-        .on("mouseover", clicked)
+        .on("click", ringOver)
+        .on("mouseover", ringOver)
+        .on("mouseout", ringOut)
 
     // data label
     ring.append("text")
@@ -143,7 +149,7 @@ d3.json("data.json", function(error, graph) {
         .enter()
             .append("path")
             .attr("d", d3.ribbon()
-                .radius(wradius - 95))
+                .radius(wradius - 115))
             .style("fill", d => indexToColor(d.source.index))
 });
 </script>
